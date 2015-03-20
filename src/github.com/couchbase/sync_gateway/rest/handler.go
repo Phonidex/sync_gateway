@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"mime"
 	"mime/multipart"
 	"net/http"
@@ -278,26 +279,7 @@ func (h *handler) getOptBoolQuery(query string, defaultValue bool) bool {
 
 // Returns the integer value of a URL query, defaulting to 0 if unparseable
 func (h *handler) getIntQuery(query string, defaultValue uint64) (value uint64) {
-	return h.getRestrictedIntQuery(query, defaultValue, 0, 0)
-}
-
-// Returns the integer value of a URL query, restricted to a min and max value,
-// but returning 0 if missing or unparseable
-func (h *handler) getRestrictedIntQuery(query string, defaultValue, minValue, maxValue uint64) uint64 {
-	value := defaultValue
-	q := h.getQuery(query)
-	if q != "" {
-		var err error
-		value, err = strconv.ParseUint(q, 10, 64)
-		if err != nil {
-			value = 0
-		} else if value < minValue {
-			value = minValue
-		} else if value > maxValue && maxValue > 0 {
-			value = maxValue
-		}
-	}
-	return value
+	return getRestrictedIntQuery(h.rq.URL.Query(), query, defaultValue, 0, 0)
 }
 
 func (h *handler) getJSONQuery(query string) (value interface{}, err error) {
@@ -516,4 +498,24 @@ func (h *handler) writeStatus(status int, message string) {
 	h.setStatus(status, message)
 	jsonOut, _ := json.Marshal(db.Body{"error": errorStr, "reason": message})
 	h.response.Write(jsonOut)
+}
+
+// Returns the integer value of a URL query, restricted to a min and max value,
+// but returning 0 if missing or unparseable
+func getRestrictedIntQuery(values url.Values, query string, defaultValue, minValue, maxValue uint64) uint64 {
+	value := defaultValue
+	q := values.Get(query)
+	if q != "" {
+		var err error
+		value, err = strconv.ParseUint(q, 10, 64)
+		if err != nil {
+			value = 0
+		} else if value < minValue {
+			value = minValue
+		} else if value > maxValue && maxValue > 0 {
+			value = maxValue
+		}
+	}
+	log.Printf("Return val: %v", value)
+	return value
 }

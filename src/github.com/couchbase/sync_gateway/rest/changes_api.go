@@ -159,11 +159,11 @@ func (h *handler) sendSimpleChanges(channels base.Set, options db.ChangesOptions
 		var heartbeat, timeout <-chan time.Time
 		if options.Wait {
 			// Set up heartbeat/timeout
-			if ms := h.getRestrictedIntQuery("heartbeat", 0, kMinHeartbeatMS, 0); ms > 0 {
+			if ms := getRestrictedIntQuery(h.rq.URL.Query(), "heartbeat", 0, kMinHeartbeatMS, 0); ms > 0 {
 				ticker := time.NewTicker(time.Duration(ms) * time.Millisecond)
 				defer ticker.Stop()
 				heartbeat = ticker.C
-			} else if ms := h.getRestrictedIntQuery("timeout", kDefaultTimeoutMS, 0, kMaxTimeoutMS); ms > 0 {
+			} else if ms := getRestrictedIntQuery(h.rq.URL.Query(), "timeout", kDefaultTimeoutMS, 0, kMaxTimeoutMS); ms > 0 {
 				timer := time.NewTimer(time.Duration(ms) * time.Millisecond)
 				defer timer.Stop()
 				timeout = timer.C
@@ -216,11 +216,11 @@ func (h *handler) generateContinuousChanges(inChannels base.Set, options db.Chan
 	var timeoutInterval time.Duration
 	var timer *time.Timer
 	var heartbeat <-chan time.Time
-	if ms := h.getRestrictedIntQuery("heartbeat", 0, kMinHeartbeatMS, 0); ms > 0 {
+	if ms := getRestrictedIntQuery(h.rq.URL.Query(), "heartbeat", 0, kMinHeartbeatMS, 0); ms > 0 {
 		ticker := time.NewTicker(time.Duration(ms) * time.Millisecond)
 		defer ticker.Stop()
 		heartbeat = ticker.C
-	} else if ms := h.getRestrictedIntQuery("timeout", kDefaultTimeoutMS, 0, kMaxTimeoutMS); ms > 0 {
+	} else if ms := getRestrictedIntQuery(h.rq.URL.Query(), "timeout", kDefaultTimeoutMS, 0, kMaxTimeoutMS); ms > 0 {
 		timeoutInterval = time.Duration(ms) * time.Millisecond
 		defer func() {
 			if timer != nil {
