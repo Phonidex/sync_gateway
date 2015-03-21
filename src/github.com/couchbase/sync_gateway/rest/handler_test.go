@@ -25,7 +25,7 @@ func TestGetRestrictedIntQuery(t *testing.T) {
 	assert.Equals(t, restricted, defaultValue)
 
 	// make sure it returns appropriate value from Values
-	values["foo"] = []string{"99"}
+	values.Set("foo", "99")
 	restricted = getRestrictedIntQuery(
 		values,
 		"foo",
@@ -36,7 +36,7 @@ func TestGetRestrictedIntQuery(t *testing.T) {
 	assert.Equals(t, restricted, uint64(99))
 
 	// make sure it is limited to max when value value is over max
-	values["foo"] = []string{"200"}
+	values.Set("foo", "200")
 	restricted = getRestrictedIntQuery(
 		values,
 		"foo",
@@ -47,7 +47,7 @@ func TestGetRestrictedIntQuery(t *testing.T) {
 	assert.Equals(t, restricted, maxValue)
 
 	// make sure it is limited to min when value value is under min
-	values["foo"] = []string{"1"}
+	values.Set("foo", "1")
 	restricted = getRestrictedIntQuery(
 		values,
 		"foo",
